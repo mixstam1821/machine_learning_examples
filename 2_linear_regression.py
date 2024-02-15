@@ -1,64 +1,74 @@
-# SIMPLE LINEAR REGRESSION
-
-# IMPORT ALL THE NECESSARY LIBRARIES
-import numpy as np
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 
 
-# READING THE CSV FILE
-data = pd.read_csv("PerCapitaIncome.csv")
+# Read the IceCreamData.csv file
+IceCream=pd.read_csv('IceCreamData.csv')
+print(IceCream)
 
 
-# PREPARING DATA FOR PREDICTION
-data = (data - data.mean())/data.std()
-X = data['year'].values
-Y = data['pci'].values
+# Print first 5 data
+IceCream.head()
+# Print mathematical description
+IceCream.describe()
+
+# Divide the data into “Attributes” and “labels”
+X = IceCream[['Temperature']]
+y = IceCream['Revenue']
+
+# Split 80% of the data to the training set while 20% of the data to test set
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 
-# DETERMINING THE LENGTH & MEAN OF THE DATA
-length = len(X)
-x_mean = np.mean(X)
-y_mean = np.mean(Y)
+# Create a Linear Regression model and fit it
+regressor =LinearRegression(fit_intercept=True)
+regressor.fit(X_train,y_train)
 
 
-# COMPUTING THE COEFFICENTS -> SLOPE & INTERCEPT
-numerator = 0
-denominator = 0
-
-for i in range(length):
-    numerator += ((X[i] - x_mean) * (Y[i] - y_mean))
-    denominator += (X[i] - x_mean) ** 2
-    
-slope = numerator / denominator
-intercept = (y_mean - (slope * x_mean))
-
-print('SLOPE : ' + str(slope) + '\nINTERCEPT : ' + str(intercept))
+# Getting Results
+print('Linear Model Coeff (m) =' , regressor.coef_)
+print('Linear Model Coeff (b) =' , regressor.intercept_)
 
 
-# DETERMINING THE X & Y LINE COEFFICIENTS
-x_max = np.max(X)
-x_min = np.min(X)
-
-# X & Y VALUES FOR PLOTTING A GRAPH
-x_plot = np.linspace(x_max, x_min, length)
-y_plot = (slope * x_plot) + intercept
+# Predicting the data
+y_predict=regressor.predict(X_test)
+print(y_predict)
 
 
-# PLOTTING THE REGRESSION LINE
-plt.xlabel('YEARS')
-plt.ylabel('PCI')
-plt.legend()
-plt.plot(x_plot, y_plot, color = '#F4A950', label = 'Regression Line')
-plt.scatter(X, Y, color = '#161B21', label = 'Scatter Plot')
-plt.show()
+
+# Scatter plot on Training Data
+plt.scatter(X_train,y_train,color='blue')
+plt.plot(X_train,regressor.predict(X_train),color='red')
+plt.ylabel('Revenue [$]')
+plt.xlabel('Temperatur [degC]')
+plt.title('Revenue Generated vs. Temperature @Ice Cream Stand (Training)')
 
 
-# EVALUATION BY ROOT MEAN SQUARE ERROR METHOD (RMSE)
-rmse = 0
-for i in range(length):
-    y_predicted = slope * X[i] + intercept
-    rmse += (Y[i] - y_predicted) ** 2
-    
-rmse = np.sqrt(rmse/length)
-print('RMSE : ' + str(rmse))
+
+
+# Scatter plot on Testing Data
+plt.scatter(X_test,y_test,color='blue')
+plt.plot(X_test,regressor.predict(X_test),color='red')
+plt.ylabel('Revenue [$]')
+plt.xlabel('Temperatur [degC]')
+plt.title('Revenue Generated vs. Temperature @Ice Cream Stand (Training)')
+
+
+
+# Prediction the revenve using Temperature Value directly
+print('---------0---------')
+Temp = -0
+Revenue = regressor.predict([[Temp]])
+print(Revenue)
+print('--------35----------')
+Temp = 35
+Revenue = regressor.predict([[Temp]])
+print(Revenue)
+print('--------55----------')
+Temp = 55
+Revenue = regressor.predict([[Temp]])
+print(Revenue)
